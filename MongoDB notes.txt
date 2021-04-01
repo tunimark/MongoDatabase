@@ -1,0 +1,178 @@
+General about Databases
+*****************************************************************************************************
+
+A. RDBMS Databases Like:
+    - Oracle
+    - MySQL
+    - SQL Server
+    are RDBMS Databases because they have:
+    - RDBMS means Relational Database Management System
+    - Tables, Columns and Rows
+    - Table stands for entity
+        - Persons
+        - Users etc.
+    - Columns stand for schema e.g. Person
+        - First Name
+        - Last Name
+        - Mobile number
+        - Address
+        - Email
+    - Rows
+        - Actual Data
+    
+B. MongoDB is a non RDBMS Database that contains:
+
+Document (below valid MongoDB document example). Schema can be different in each document.
+MongoDB will automatically insert unique id ("_id")
+    {
+        "_id": <unique>,
+        "firstname": "Mark",
+        "lastname": "Tunnicliffe",
+        "eamil": "test@eamil.com",
+    },
+    {
+        "_id": <unique>,
+        "firstname": "Mark",
+        "lastname": "Tunnicliffe",
+        "eamil": "test@eamil.com",
+        "address": "Test Street",
+    },
+    - can insert any number of documents into a collection
+    - can insert one ore many documents at the same time
+    - every document receives automatrically a unique key/_id
+        - 24 characters long, unique and similar to primary key in RDBMS 
+        - can the key be changed?
+            - yes it can but it's tricky so better not do it
+
+Collections contain:
+    - Set of multiple documents
+    - MongoDB doesn't force you in a schema
+        - no joins concept
+        - can join multiple collections using Aggregation 
+    - Any number of documents
+    - Documents can have any dynamic schema
+        - they can be the same or different.
+
+Database:
+    - One or more collections become a database.
+
+*****************************************************************************************************
+
+1. Start MongoDB project
+    - already connected to localhost:27017
+    - Open Terminal with ctrl and ö
+    - change directory into C:\Program Files\MongoDB\Server\4.4\bin
+        - cd 'C:\Program Files\'
+        - cd .\MongoDB
+        - cd .\Server
+        - cd .\4.4\
+        - cd .\bin
+    - run .\mongo.exe in command line
+        - now the MongoDB shell/terminal is started
+
+*****************************************************************************************************
+
+2. MongoDB commands
+
+    Databases commands:
+    -------------------
+    - show databases; "shows a list of your databases"
+    - use CRM; "CRM is the name of the DB in this case. Terminal switches/uses DB, or if not
+      existing, it will create it -> note if no content it won't be shown in browser on the left.
+    - db "shows the database you are currently in"
+    - db.dropDatabase(); "deletes the database you are in"
+
+    Collection commands:
+    --------------------
+    - db.createCollection("<CollectionName>"); "Creates a new collection"
+    - db.collectionName.drop(); "Deletes a collection -> .collectionName. -> has to be the name of 
+      the collection. db. is the DB you are currently in. Can be replaces with the actual name of 
+      the DB"
+
+    Document commands: (when you are currently in the right database)
+    -----------------------------------------------------------------
+    Create one or more new documents:
+    *********************************
+    - db.CollectionName.insert({"name":"Mark"}); ".CollectionName. -> replaced with the actual 
+      collections name, "name" -> replaced with the actual variable of choice, "Mark" -> replace 
+      with Value yue want to insert"
+    - db.CollectionName.insert({"name":"Mark", "email":"test@email.com", "address":"Test Street"});
+      "same as above but inserting more than one variable to a document"
+    - Insert multiple documents at the same time, replace as before:
+    db.CollectionName.insertMany([
+        {"name":"Mark", "email":"test@email.com", "Address":"Test Street"},
+        {"name":"Tanja", "email":"test2@email.com", "Address":"Test Road"}
+        ]);
+    Update one or more documents:
+    *****************************
+    - Search for the first matching document and update it:
+    db.Contacts.update(
+        {"name":"Mark"},
+        {
+            $set: {
+                "email": "mark@gmail.com",
+                "isActive": "true"
+            }
+        }
+        );
+    - Search for the many matching documents and update them at the same time:
+        db.Contacts.updateMany(
+        {"Address":"Second Street"},
+        {
+            $set: {
+                "Address":"Third Street"
+            }
+        }
+        );
+    Find one or more documents:
+    ***************************
+    - Read data/documents from collection
+        - return -> all the documents
+          db.CollectionName.find(); 
+        - return -> the first document only
+          db.CollectionName.findOne();
+        - return -> filtered document/s with one condition (the document containing the name Tanja)
+          db.CollectionName.find({"name":"Tanja"});
+        - return -> filtered document/s with more then one condition (the document containing the name Mark and email test@email.com)
+          db.CollectionName.find({"name":"Mark", "email":"test@email.com"});
+        ****if you star typing 'db.CollectionName.find' and hit 'TAB' you'll get auto completion**** 
+        - find document and replace
+            db.CollectionName.findOneAndReplace({"isActive":"true"},{"age":"45"});
+        - find document and delete
+            db.CollectionName.findOneAndDelete({"isActive":"true"});
+    - Delete documents
+        - db.CollectionName.deleteOne({"name":"Mark"}); "delete ON>E document"
+        - db.CollectionName.deleteMany({"name":"Mark"}); "delete MANY documents"
+
+*****************************************************************************************************
+
+3. Queries in MongoDB
+
+    Using the find method of MongoDB with operators.
+    - $Eq "means equal to"   -   db.Contacts.find({"Name":"Mark"});
+    - $lt "means less then"   -   db.Contacts.find({"age": {$lt: "45"}});
+    - $lte "means les then or equal to"   -   db.Contacts.find({"age": {$lte: "45"}});
+    - $gt "means greater then"   -   db.Contacts.find({"age": {$gt: "45"}});
+    - $gte "means greater then or equal to"   -   db.Contacts.find({"age": {$gte: "45"}});
+    ------------------------------------------------
+    - $and   -   db.Contacts.find({$and : [{"gender": "male" }, {"age":{$lte: "45"}} ]});
+    - $or   -   db.Contacts.find({$or : [{"gender": "male" }, {"age":{$lte: "45"}} ]});
+
+*****************************************************************************************************
+
+4. Selecting fields
+
+    - db.Contacts.find();   -   return all documents
+    - db.Contacts.find({}, {"name":1});   -   return all values of the field "name" of each 
+                                              documents including _id (default)
+    - db.Contacts.find({}, {"name":1, "_id":0});   -   return all values of the field "name" of each 
+                                              documents BUT NOT the _id
+    - db.Contacts.find({"age": {$lte: "45"}}, {"name":1, "age":1, "_id":0});
+        - return all values of the field "name", "age" (only if less or equal to 45) of each 
+          documents BUT NOT the _id
+
+*****************************************************************************************************
+
+5. Projection
+
+    
